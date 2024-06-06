@@ -362,7 +362,7 @@
                     data['length_input'] = '不限';
                 }
 
-                fetch('https://webtool-u4ip.onrender.com', {
+                fetch('https://webtool-u4ip.onrender.com/generate_script', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -461,7 +461,7 @@
             submitButton.disabled = true;
             clearButton.disabled = true;
 
-            fetch('/modify_script', {
+            fetch('https://webtool-u4ip.onrender.com/modify_script', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
