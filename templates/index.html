@@ -151,7 +151,26 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module">
         import { updateAdditionalContent } from '/static/additionalContent.js';
-    
+
+        async function submitForm(event) {
+        event.preventDefault();
+        const data = new FormData(event.target);
+
+        const response = await fetch('https://webtool-u4ip.onrender.com/generate_script', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(data))
+        });
+
+        if (!response.ok) {
+            console.error('Failed to submit form');
+        }
+    }
+
+    document.getElementById('videoForm').addEventListener('submit', submitForm);
+
         function updateScenarios() {
             var videoType = document.getElementById("video_type").value;
             var scenarioGroup = document.getElementById("scenario_group");
