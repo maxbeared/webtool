@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>短视频脚本助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+    <link rel="icon" type="image/png" href="/static/favicon.png"> <!-- 引用 .png 格式的图标 -->
+    <style>
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: none;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+        }
+        th {
+            background-color: #eaf5ff; /* 淡蓝色 */
+            padding: 8px;
+            text-align: left;
+        }
+        td {
+            background-color: #ffffff; /* 白色 */
+            padding: 8px;
+            text-align: left;
+        }
+        /* 为表格的四个角添加圆角 */
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+        th:last-child {
+            border-top-right-radius: 10px;
+        }
+        tr:last-child td:first-child {
+            border-bottom-left-radius: 10px;
+        }
+        tr:last-child td:last-child {
+            border-bottom-right-radius: 10px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            width: 1500px;
+            max-width: 100%;
+        }
+        form {
+            width: 600px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        .output {
+            width: 600px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .markdown-body {
+            padding: 20px;
+            background: #f4f4f9;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        h2 {
+            color: #666;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        select, textarea, input[type="text"], input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        textarea {
+            resize: none;
+        }
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            margin: 5px 10px 5px 0;
+        }
+        .radio-group .placeholder {
+            color: #888;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px 0 0;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button[type="button"] {
+            background-color: #dc3545;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+        #length_container {
+            display: flex;
+            align-items: center;
+        }
+        #length_range {
+            width: 70%;
+            margin-right: 10px;
+        }
+        #length_input {
+            width: 80px;
+            margin-right: 5px;
+        }
+        #length_unit {
+            font-size: 16px;
+        }
+        #error_message {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module">
+        import { updateAdditionalContent } from '/static/additionalContent.js';
+    
+        function updateScenarios() {
+            var videoType = document.getElementById("video_type").value;
+            var scenarioGroup = document.getElementById("scenario_group");
+            var additionalContent = document.getElementById("additional_content");
+
+            // 清空之前的附加内容
+            additionalContent.innerHTML = '';
+
+            scenarioGroup.innerHTML = "";
+    
+            if (videoType === "") {
+                let placeholder = document.createElement("div");
+                placeholder.className = "placeholder";
+                placeholder.innerText = "请先选择视频类型";
+                scenarioGroup.appendChild(placeholder);
+                return;
+            }
+    
+            let options = [];
+            if (videoType === "advertisement") {
+                options = ["品牌形象", "推销产品", "直播引流", "活动宣传", "其他类型"];
+            } else if (videoType === "knowledge") {
+                options = ["知识科普", "实用教程", "其他类型"];
+            } else if (videoType === "story") {
+                options = ["短剧", "动画", "故事", "影视解说", "视频混剪", "其他类型"];
+            } else if (videoType === "hobby") {
+                options = ["歌舞", "乐器", "书画", "游戏", "旅行", "体育", "种植", "宠物", "其他类型"];
+            } else if (videoType === "interactive") {
+                options = ["采访", "社会实验", "问答", "挑战", "测评", "其他类型"];
+            } else if (videoType === "lifestyle") {
+                options = ["日常", "亲子", "旅行", "运动", "美食", "萌宠", "其他类型"];
+            } else if (videoType === "news") {
+                options = ["信息发布", "事件报道", "政策解读", "其他类型"];
+            }
+    
+            options.forEach(option => {
+                let label = document.createElement("label");
+                let radio = document.createElement("input");
+                radio.type = "radio";
+                radio.name = "scenario";
+                radio.value = option;
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(option));
+                scenarioGroup.appendChild(label);
+            });
+    
+            document.querySelectorAll('input[name="scenario"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateAdditionalContent(this.value);
+                });
+            });
+        }
+    
+        window.updateScenarios = updateScenarios;
+    
+        function clearForm() {
+            if (confirm("确定要清空表单吗？")) {
+                document.getElementById("videoForm").reset();
+                updateScenarios();
+                updateLengthRange();
+                document.getElementById('error_message').innerText = '';
+                document.getElementById('generated_script').innerHTML = '';
+                document.getElementById('modify_button').style.display = 'none';
+                document.getElementById('modify_input_container').style.display = 'none';
+                document.getElementById('modify_input').value = ''; // 清空修改输入框
+            }
+        }
+    
+        window.clearForm = clearForm;
+    
+        function updateLengthRange() {
+            const lengthType = document.querySelector('input[name="length_type"]:checked').value;
+            const lengthRange = document.getElementById('length_range');
+            const lengthInput = document.getElementById('length_input');
+            const lengthUnit = document.getElementById('length_unit');
+            const isUnlimited = lengthType === 'unlimited';
+    
+            if (isUnlimited) {
+                lengthRange.disabled = true;
+                lengthInput.disabled = true;
+                lengthInput.placeholder = "长度不限";
+                lengthInput.value = "";
+                lengthUnit.textContent = "";
+            } else if (lengthType === 'time') {
+                lengthRange.disabled = false;
+                lengthInput.disabled = false;
+                lengthRange.min = 15;
+                lengthRange.max = 300;
+                lengthRange.step = 5;
+                lengthRange.value = 15;
+                lengthInput.placeholder = "秒";
+                lengthUnit.textContent = "秒";
+                lengthInput.value = lengthRange.value;
+            } else {
+                lengthRange.disabled = false;
+                lengthInput.disabled = false;
+                lengthRange.min = 10;
+                lengthRange.max = 500;
+                lengthRange.step = 10;
+                lengthRange.value = 10;
+                lengthInput.placeholder = "字";
+                lengthUnit.textContent = "字";
+                lengthInput.value = lengthRange.value;
+            }
+    
+            document.getElementById('error_message').innerText = '';
+        }
+    
+        window.updateLengthRange = updateLengthRange;
+    
+        function updateLengthValue() {
+            const lengthRange = document.getElementById('length_range');
+            document.getElementById('length_input').value = lengthRange.value;
+        }
+    
+        window.updateLengthValue = updateLengthValue;
+    
+        function validateLengthInput() {
+            const lengthType = document.querySelector('input[name="length_type"]:checked').value;
+            const lengthInput = document.getElementById('length_input');
+            const lengthRange = document.getElementById('length_range');
+            const errorMessage = document.getElementById('error_message');
+    
+            let min, max, step;
+            if (lengthType === 'time') {
+                min = 15;
+                max = 300;
+                step = 5;
+            } else {
+                min = 10;
+                max = 500;
+                step = 10;
+            }
+    
+            let value = parseInt(lengthInput.value);
+            if (isNaN(value) || value < min || value > max) {
+                errorMessage.innerText = `请输入范围在 ${min} 到 ${max} 之间的值`;
+                value = Math.max(min, Math.min(max, value || min));
+            } else if (value % step !== 0) {
+                errorMessage.innerText = `请输入 ${step} 的倍数`;
+                value = Math.round(value / step) * step;
+            } else {
+                errorMessage.innerText = '';
+            }
+    
+            lengthRange.value = value;
+            lengthInput.value = value;
+        }
+    
+        window.validateLengthInput = validateLengthInput;
+    
+        function validateForm(event) {
+            event.preventDefault();
+            let isValid = true;
+            const errorMessage = document.getElementById('error_message');
+            errorMessage.innerText = '';
+
+            const videoType = document.getElementById('video_type').value;
+            const scenario = document.querySelector('input[name="scenario"]:checked');
+            const lengthType = document.querySelector('input[name="length_type"]:checked').value;
+            const lengthInput = document.getElementById('length_input').value;
+            const content = document.getElementById('content').value;
+
+            if (!videoType) {
+                errorMessage.innerText += '请选择视频类型。\n';
+                isValid = false;
+            }
+            if (!scenario) {
+                errorMessage.innerText += '请选择应用场景。\n';
+                isValid = false;
+            }
+            if (lengthType !== 'unlimited' && !lengthInput) {
+                errorMessage.innerText += '请设置脚本长度。\n';
+                isValid = false;
+            }
+            if (!content) {
+                errorMessage.innerText += '请填写其他要点。\n';
+                isValid = false;
+            }
+
+            const additionalInputs = document.querySelectorAll('#additional_content input, #additional_content textarea');
+            additionalInputs.forEach(input => {
+                if (!input.value) {
+                    errorMessage.innerText += `请填写${input.previousElementSibling.innerText}。\n`;
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                const submitButton = document.querySelector('button[type="submit"]');
+                const clearButton = document.querySelector('button[type="button"]');
+                submitButton.disabled = true;
+                clearButton.disabled = true;
+                const generatedScriptElement = document.getElementById('generated_script');
+                generatedScriptElement.innerHTML = '';
+
+                const formData = new FormData(document.getElementById('videoForm'));
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                if (lengthType === 'time' && lengthInput) {
+                    data['length_input'] = `${lengthInput}`;
+                } else if (lengthType === 'words' && lengthInput) {
+                    data['length_input'] = `${lengthInput}`;
+                } else {
+                    data['length_input'] = '不限';
+                }
+
+                fetch('/generate_script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    return new ReadableStream({
+                        start(controller) {
+                            let rawcontent = '';
+
+                            function push() {
+                                reader.read().then(({ done, value }) => {
+                                    if (done) {
+                                        document.getElementById('modify_button').style.display = 'block'; // 显示修改按钮
+                                        controller.close();
+                                        submitButton.disabled = false; // 启用按钮
+                                        clearButton.disabled = false; // 启用按钮
+                                        return;
+                                    }
+
+                                    buffer += decoder.decode(value, { stream: true });
+
+                                    let lines = buffer.split('/n');
+                                    buffer = lines.pop(); // Keep the last partial line in the buffer
+
+                                    lines.forEach(line => {
+                                        if (line.startsWith('data: ')) {
+                                            let content = line.slice(6); // Remove 'data: '
+                                            try {
+                                                // 仅去掉转义的换行符
+                                                rawcontent += content.replace(/\n/g, '').replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n');
+                                                generatedScriptElement.innerHTML = marked.parse(rawcontent);
+                                            } catch (error) {
+                                                console.error('Error parsing content:', error);
+                                            }
+                                        }
+                                    });
+
+                                    push();
+                                }).catch(error => {
+                                    console.error('Error reading stream:', error);
+                                    submitButton.disabled = false; // 启用按钮
+                                    clearButton.disabled = false; // 启用按钮
+                                });
+                            }
+                            push();
+                        }
+                    });
+                }).catch(error => {
+                    console.error('Error:', error);
+                    generatedScriptElement.innerHTML = '<p>生成脚本时出现错误，请稍后再试。</p>';
+                    submitButton.disabled = false; // 启用按钮
+                    clearButton.disabled = false; // 启用按钮
+                });
+            }
+        }
+
+        window.validateForm = validateForm;
+
+        window.showModifyInput = function() {
+            document.getElementById('modify_button').style.display = 'none';
+            document.getElementById('modify_input_container').style.display = 'block';
+            document.getElementById('modify_input').value = ''; // 清空输入框
+        };
+
+        window.sendModification = function() {
+            const modification = document.getElementById('modify_input').value;
+            if (!modification) {
+                alert('请输入修改意见。');
+                return;
+            }
+
+            const generatedScript = document.getElementById('generated_script').innerText;
+            const videoType = document.getElementById('video_type').value;
+            const data = {
+                script: generatedScript,
+                modification: modification,
+                video_type: videoType // 传递视频类型用于追加提示词
+            };
+
+            const submitButton = document.querySelector('button[type="submit"]');
+            const clearButton = document.querySelector('button[type="button"]');
+            const modifyButton = document.getElementById('modify_button');
+            const modifyInputContainer = document.getElementById('modify_input_container');
+
+            modifyButton.style.display = 'none';
+            modifyInputContainer.style.display = 'none';
+            submitButton.disabled = true;
+            clearButton.disabled = true;
+
+            fetch('/modify_script', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应错误');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                return new ReadableStream({
+                    start(controller) {
+                        let rawcontent = '';
+
+                        function push() {
+                            reader.read().then(({ done, value }) => {
+                                if (done) {
+                                    controller.close();
+                                    submitButton.disabled = false;
+                                    clearButton.disabled = false;
+                                    modifyButton.style.display = 'block';
+                                    return;
+                                }
+
+                                buffer += decoder.decode(value, { stream: true });
+
+                                let lines = buffer.split('/n');
+                                buffer = lines.pop();
+
+                                lines.forEach(line => {
+                                    if (line.startsWith('data: ')) {
+                                        let content = line.slice(6);
+                                        try {
+                                            rawcontent += content.replace(/\n/g, '').replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n');
+                                            document.getElementById('generated_script').innerHTML = marked.parse(rawcontent);
+                                        } catch (error) {
+                                            console.error('解析内容时出错:', error);
+                                        }
+                                    }
+                                });
+
+                                push();
+                            }).catch(error => {
+                                console.error('读取流时出错:', error);
+                            });
+                        }
+                        push();
+                    }
+                });
+            }).catch(error => {
+                console.error('出错:', error);
+                alert('修改脚本时出现错误，请稍后再试。');
+                submitButton.disabled = false;
+                clearButton.disabled = false;
+                modifyButton.style.display = 'block';
+            });
+        };
+    </script>    
+</head>
+<body onload="updateScenarios()">
+    <div class="container">
+        <form id="videoForm" method="POST" onsubmit="validateForm(event)">
+            <div>
+                <h2>视频类型<span style="color:red;">*</span></h2>
+                <select id="video_type" name="video_type" onchange="updateScenarios()">
+                    <option value="">请选择</option>
+                    <option value="advertisement">广告宣传类</option>
+                    <option value="knowledge">知识分享类</option>
+                    <option value="story">故事娱乐类</option>
+                    <option value="hobby">兴趣爱好类</option>
+                    <option value="interactive">互动社会类</option>
+                    <option value="lifestyle">生活记录类</option>
+                    <option value="news">新闻资讯类</option>
+                </select>
+            </div>
+            <div>
+                <h2>应用场景<span style="color:red;">*</span></h2>
+                <div id="scenario_group" class="radio-group">
+                </div>
+            </div>
+            <div id="additional_content"></div>
+            <div>
+                <h2>其他要点<span style="color:red;">*</span></h2>
+                <textarea id="content" name="content" rows="4" placeholder="在这里输入具体内容，如果没有填“无”"></textarea>
+            </div>
+            <div>
+                <h2>脚本长度<span style="color:red;">*</span></h2>
+                <label><input type="radio" name="length_type" value="unlimited" checked onclick="updateLengthRange()"> 长度不限</label>
+                <label><input type="radio" name="length_type" value="time" onclick="updateLengthRange()"> 时长 (秒)</label>
+                <label><input type="radio" name="length_type" value="words" onclick="updateLengthRange()"> 字数</label>
+                <div id="length_container">
+                    <input type="range" id="length_range" min="15" max="300" step="5" value="15" oninput="updateLengthValue()" disabled>
+                    <input type="number" id="length_input" placeholder="长度不限" onblur="validateLengthInput()" disabled>
+                    <span id="length_unit"></span>
+                </div>
+                <div id="error_message"></div>
+            </div>
+            <div>
+                <button type="submit">提交</button>
+                <button type="button" onclick="clearForm()">清空</button>
+            </div>
+        </form>
+        <div class="output">
+            <h1>视频脚本</h1>
+            <div id="generated_script" style="margin-top: 20px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background: #fefeff; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"></div>
+            <button id="modify_button" style="display:none;" onclick="showModifyInput()">修改脚本</button>
+            <div id="modify_input_container" style="display:none;">
+                <textarea id="modify_input" rows="4" placeholder="请输入修改意见..."></textarea>
+                <button onclick="sendModification()">发送</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
